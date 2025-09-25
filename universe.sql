@@ -49,8 +49,10 @@ SET default_table_access_method = heap;
 
 CREATE TABLE public.galaxy (
     galaxy_id integer NOT NULL,
-    name character varying(60),
-    number_of_star integer
+    name character varying(60) NOT NULL,
+    number_of_star integer,
+    has_blackhole boolean,
+    solar_mass numeric(4,1)
 );
 
 
@@ -125,6 +127,44 @@ ALTER SEQUENCE public.star_star_id_seq OWNED BY public.star.star_id;
 
 
 --
+-- Name: universe_map; Type: TABLE; Schema: public; Owner: freecodecamp
+--
+
+CREATE TABLE public.universe_map (
+    universe_map_id integer NOT NULL,
+    galaxy_id integer NOT NULL,
+    star_id integer NOT NULL,
+    planet_id integer NOT NULL,
+    moon_id integer NOT NULL,
+    name character varying(60)
+);
+
+
+ALTER TABLE public.universe_map OWNER TO freecodecamp;
+
+--
+-- Name: universe_map_map_id_seq; Type: SEQUENCE; Schema: public; Owner: freecodecamp
+--
+
+CREATE SEQUENCE public.universe_map_map_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.universe_map_map_id_seq OWNER TO freecodecamp;
+
+--
+-- Name: universe_map_map_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: freecodecamp
+--
+
+ALTER SEQUENCE public.universe_map_map_id_seq OWNED BY public.universe_map.universe_map_id;
+
+
+--
 -- Name: star star_id; Type: DEFAULT; Schema: public; Owner: freecodecamp
 --
 
@@ -132,15 +172,22 @@ ALTER TABLE ONLY public.star ALTER COLUMN star_id SET DEFAULT nextval('public.st
 
 
 --
+-- Name: universe_map universe_map_id; Type: DEFAULT; Schema: public; Owner: freecodecamp
+--
+
+ALTER TABLE ONLY public.universe_map ALTER COLUMN universe_map_id SET DEFAULT nextval('public.universe_map_map_id_seq'::regclass);
+
+
+--
 -- Data for Name: galaxy; Type: TABLE DATA; Schema: public; Owner: freecodecamp
 --
 
-INSERT INTO public.galaxy VALUES (1, 'Milky Way', NULL);
-INSERT INTO public.galaxy VALUES (2, 'Andromeda', NULL);
-INSERT INTO public.galaxy VALUES (3, 'Triangulum', NULL);
-INSERT INTO public.galaxy VALUES (4, 'Sombrero Galaxy', NULL);
-INSERT INTO public.galaxy VALUES (5, 'Whirlpool Galaxy', NULL);
-INSERT INTO public.galaxy VALUES (6, 'Messier 87', NULL);
+INSERT INTO public.galaxy VALUES (1, 'Milky Way', NULL, NULL, NULL);
+INSERT INTO public.galaxy VALUES (2, 'Andromeda', NULL, NULL, NULL);
+INSERT INTO public.galaxy VALUES (3, 'Triangulum', NULL, NULL, NULL);
+INSERT INTO public.galaxy VALUES (4, 'Sombrero Galaxy', NULL, NULL, NULL);
+INSERT INTO public.galaxy VALUES (5, 'Whirlpool Galaxy', NULL, NULL, NULL);
+INSERT INTO public.galaxy VALUES (6, 'Messier 87', NULL, NULL, NULL);
 
 
 --
@@ -200,10 +247,26 @@ INSERT INTO public.star VALUES (6, 'Vega', 1, NULL, NULL, NULL);
 
 
 --
+-- Data for Name: universe_map; Type: TABLE DATA; Schema: public; Owner: freecodecamp
+--
+
+INSERT INTO public.universe_map VALUES (1, 1, 1, 3, 1, 'Milky Way - Sun - Earth - Moon');
+INSERT INTO public.universe_map VALUES (2, 1, 1, 4, 2, 'Milky Way - Sun - Mars - Phobos');
+INSERT INTO public.universe_map VALUES (3, 1, 1, 4, 3, 'Milky Way - Sun - Mars - Deimos');
+
+
+--
 -- Name: star_star_id_seq; Type: SEQUENCE SET; Schema: public; Owner: freecodecamp
 --
 
 SELECT pg_catalog.setval('public.star_star_id_seq', 2, true);
+
+
+--
+-- Name: universe_map_map_id_seq; Type: SEQUENCE SET; Schema: public; Owner: freecodecamp
+--
+
+SELECT pg_catalog.setval('public.universe_map_map_id_seq', 3, true);
 
 
 --
@@ -271,6 +334,22 @@ ALTER TABLE ONLY public.star
 
 
 --
+-- Name: universe_map unique_universe_map; Type: CONSTRAINT; Schema: public; Owner: freecodecamp
+--
+
+ALTER TABLE ONLY public.universe_map
+    ADD CONSTRAINT unique_universe_map UNIQUE (galaxy_id, star_id, planet_id, moon_id);
+
+
+--
+-- Name: universe_map universe_map_pkey; Type: CONSTRAINT; Schema: public; Owner: freecodecamp
+--
+
+ALTER TABLE ONLY public.universe_map
+    ADD CONSTRAINT universe_map_pkey PRIMARY KEY (universe_map_id);
+
+
+--
 -- Name: moon moon_planet_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
 --
 
@@ -292,6 +371,38 @@ ALTER TABLE ONLY public.planet
 
 ALTER TABLE ONLY public.star
     ADD CONSTRAINT star_galaxy_id_fkey FOREIGN KEY (galaxy_id) REFERENCES public.galaxy(galaxy_id);
+
+
+--
+-- Name: universe_map universe_map_galaxy_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
+--
+
+ALTER TABLE ONLY public.universe_map
+    ADD CONSTRAINT universe_map_galaxy_id_fkey FOREIGN KEY (galaxy_id) REFERENCES public.galaxy(galaxy_id);
+
+
+--
+-- Name: universe_map universe_map_moon_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
+--
+
+ALTER TABLE ONLY public.universe_map
+    ADD CONSTRAINT universe_map_moon_id_fkey FOREIGN KEY (moon_id) REFERENCES public.moon(moon_id);
+
+
+--
+-- Name: universe_map universe_map_planet_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
+--
+
+ALTER TABLE ONLY public.universe_map
+    ADD CONSTRAINT universe_map_planet_id_fkey FOREIGN KEY (planet_id) REFERENCES public.planet(planet_id);
+
+
+--
+-- Name: universe_map universe_map_star_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: freecodecamp
+--
+
+ALTER TABLE ONLY public.universe_map
+    ADD CONSTRAINT universe_map_star_id_fkey FOREIGN KEY (star_id) REFERENCES public.star(star_id);
 
 
 --
